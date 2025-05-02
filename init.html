@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cat Slideshow from Unsplash</title>
+  <style>
+    body {
+      background: #111;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    #root {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .container img {
+      width: 600px;
+      height: 400px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div class="container"></div>
+  </div>
+
+  <script>
+    const container = document.querySelector(".container");
+
+    let photoArray = [];
+    let pageIndex = 0;
+    let interval = null;
+
+    const accessKey = "zE9SiiMyCl5TxAqvpUIphoUSd72HIHrQFBmwUAm4hAg"; // 🔑 Replace with your real Unsplash API key
+    const query = "cats";
+    const perPage = 30;
+
+    const getPhotos = () => {
+      fetch(`https://api.unsplash.com/search/photos?query=${query}&per_page=${perPage}&client_id=${accessKey}`)
+        .then(response => response.json())
+        .then(data => {
+          data.results.forEach(photo => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = photo.urls.regular;
+            photoArray.push(img);
+          });
+
+          startSlideshow();
+        })
+        .catch(err => {
+          console.error("Error fetching from Unsplash:", err);
+        });
+    };
+
+    const startSlideshow = () => {
+      interval = setInterval(() => {
+        const oldImg = document.querySelector(".container img");
+        if (oldImg) container.removeChild(oldImg);
+
+        container.appendChild(photoArray[pageIndex]);
+        pageIndex++;
+        if (pageIndex === photoArray.length) pageIndex = 0;
+      }, 1000);
+    };
+
+    getPhotos();
+  </script>
+</body>
+</html>
